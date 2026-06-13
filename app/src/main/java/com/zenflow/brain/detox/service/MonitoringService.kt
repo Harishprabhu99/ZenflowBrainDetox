@@ -177,7 +177,7 @@ class MonitoringService : Service() {
         const val ACTION_STOP = "com.zenflow.brain.detox.STOP_MONITORING"
         private const val CHANNEL_ID = "monitoring_channel"
         private const val NOTIFICATION_ID = 1001
-        private const val POLL_INTERVAL_MS = 5_000L
+        private const val POLL_INTERVAL_MS = 1_000L
 
         fun start(context: Context) {
             val intent = Intent(context, MonitoringService::class.java)

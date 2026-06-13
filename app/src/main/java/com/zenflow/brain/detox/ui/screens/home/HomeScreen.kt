@@ -88,9 +88,20 @@ fun HomeScreen(
                 }
             }
 
+            if (!uiState.hasOverlayPermission) {
+                OutlinedButton(
+                    onClick = {
+                        context.startActivity(PermissionHelper.overlaySettingsIntent(context))
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text("Grant Overlay Permission")
+                }
+            }
+
             Button(
                 onClick = { viewModel.toggleMonitoring() },
-                enabled = uiState.hasUsagePermission,
+                enabled = uiState.hasUsagePermission && uiState.hasOverlayPermission,
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = if (uiState.isMonitoring) BlockRed else PrimaryBlue,

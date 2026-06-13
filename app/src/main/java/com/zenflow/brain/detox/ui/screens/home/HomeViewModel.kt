@@ -20,6 +20,7 @@ data class HomeUiState(
     val dailyGoalPercent: Float = 0f,
     val isMonitoring: Boolean = false,
     val hasUsagePermission: Boolean = false,
+    val hasOverlayPermission: Boolean = false,
 )
 
 class HomeViewModel(
@@ -55,6 +56,7 @@ class HomeViewModel(
                         dailyGoalPercent = goalPercent,
                         isMonitoring = settings.monitoringEnabled,
                         hasUsagePermission = PermissionHelper.hasUsageStatsPermission(context),
+                        hasOverlayPermission = PermissionHelper.hasOverlayPermission(context),
                     )
                 }
             }.collect {}
