@@ -60,7 +60,7 @@ class GoogleDriveHelper(private val context: Context) {
             }
             true
         } catch (e: Exception) {
-            e.printStackTrace()
+            android.util.Log.e("GoogleDriveHelper", "Upload failed: ${e.message}", e)
             false
         }
     }

@@ -63,11 +63,22 @@ class SettingsViewModel(
     fun uploadBackup() {
         viewModelScope.launch {
             _uiState.update { it.copy(isBackupLoading = true, backupMessage = "Uploading...") }
+            val account = backupRepository.getGoogleDriveHelper().getSignedInAccount()
+            if (account == null) {
+                _uiState.update {
+                    it.copy(
+                        isBackupLoading = false,
+                        backupMessage = "Not signed in to Google",
+                        isGoogleSignedIn = false
+                    )
+                }
+                return@launch
+            }
             val success = backupRepository.uploadToCloud()
             _uiState.update {
                 it.copy(
                     isBackupLoading = false,
-                    backupMessage = if (success) "Backup uploaded successfully" else "Failed to upload backup"
+                    backupMessage = if (success) "Backup uploaded successfully" else "Failed to upload backup. Check permissions."
                 )
             }
         }
