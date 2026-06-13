@@ -30,6 +30,7 @@ class AppSelectionViewModel(
 
     init {
         viewModelScope.launch {
+            blockedAppRepository.ensureDefaultsSeeded()
             blockedAppRepository.observeBlockedApps().collect { apps ->
                 _uiState.update { it.copy(apps = apps) }
             }

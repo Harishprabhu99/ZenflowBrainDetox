@@ -51,6 +51,9 @@ class BlockedAppRepository(
     }
 
     suspend fun ensureDefaultsSeeded() {
+        val existing = blockedAppDao.getAll()
+        if (existing.isNotEmpty()) return
+
         val defaults = SocialMediaCatalog.defaultApps.map {
             BlockedAppEntity(
                 packageName = it.packageName,
@@ -63,8 +66,22 @@ class BlockedAppRepository(
     }
 
     suspend fun toggleApp(packageName: String, enabled: Boolean) {
-        blockedAppDao.getByPackage(packageName)?.let {
-            blockedAppDao.upsert(it.copy(isEnabled = enabled))
+        val existing = blockedAppDao.getByPackage(packageName)
+        if (existing != null) {
+            blockedAppDao.upsert(existing.copy(isEnabled = enabled))
+        } else {
+            // If it doesn't exist in DB, look it up in catalog and create it
+            val catalogApp = SocialMediaCatalog.defaultApps.find { it.packageName == packageName }
+            if (catalogApp != null) {
+                blockedAppDao.upsert(
+                    BlockedAppEntity(
+                        packageName = catalogApp.packageName,
+                        displayName = catalogApp.displayName,
+                        dailyLimitMinutes = 30,
+                        isEnabled = enabled
+                    )
+                )
+            }
         }
     }
 
