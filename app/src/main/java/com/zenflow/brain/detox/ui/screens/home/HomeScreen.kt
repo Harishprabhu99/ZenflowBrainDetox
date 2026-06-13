@@ -57,7 +57,7 @@ fun HomeScreen(
     ) {
         item {
             Text(
-                text = "Brain Rot Reducer",
+                text = "Zenflow Brain Detox",
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
             )

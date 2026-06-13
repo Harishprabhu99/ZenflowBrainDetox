@@ -167,7 +167,7 @@ class MonitoringService : Service() {
             "Usage Monitoring",
             NotificationManager.IMPORTANCE_LOW,
         ).apply {
-            description = "Keeps Brain Rot Reducer monitoring your app usage"
+            description = "Keeps Zenflow Brain Detox monitoring your app usage"
         }
         val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         manager.createNotificationChannel(channel)
