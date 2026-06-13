@@ -3,9 +3,11 @@ package com.zenflow.brain.detox.di
 import android.content.Context
 import androidx.room.Room
 import com.zenflow.brain.detox.data.local.AppDatabase
+import com.zenflow.brain.detox.data.repository.BackupRepository
 import com.zenflow.brain.detox.data.repository.BlockedAppRepository
 import com.zenflow.brain.detox.data.repository.SettingsRepository
 import com.zenflow.brain.detox.data.repository.UsageRepository
+import com.zenflow.brain.detox.util.GoogleDriveHelper
 import com.zenflow.brain.detox.util.UsageStatsHelper
 
 class AppContainer(context: Context) {
@@ -27,5 +29,18 @@ class AppContainer(context: Context) {
 
     val settingsRepository: SettingsRepository by lazy {
         SettingsRepository(database.settingsDao())
+    }
+
+    val googleDriveHelper: GoogleDriveHelper by lazy {
+        GoogleDriveHelper(context)
+    }
+
+    val backupRepository: BackupRepository by lazy {
+        BackupRepository(
+            database.settingsDao(),
+            database.blockedAppDao(),
+            database.usageLogDao(),
+            googleDriveHelper
+        )
     }
 }

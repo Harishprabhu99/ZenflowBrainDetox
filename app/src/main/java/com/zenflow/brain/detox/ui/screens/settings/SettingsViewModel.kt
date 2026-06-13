@@ -15,6 +15,10 @@ data class SettingsUiState(
     val notifyAt50Percent: Boolean = true,
     val notifyAt90Percent: Boolean = true,
     val hasUsagePermission: Boolean = false,
+    val isGoogleSignedIn: Boolean = false,
+    val googleAccountName: String? = null,
+    val isBackupLoading: Boolean = false,
+    val backupMessage: String? = null,
 )
 
 class SettingsViewModel(
@@ -22,12 +26,14 @@ class SettingsViewModel(
 ) : ViewModel() {
 
     private val settingsRepository = container.settingsRepository
+    private val backupRepository = container.backupRepository
     private val context = container.context
 
     private val _uiState = MutableStateFlow(SettingsUiState())
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
 
     init {
+        refreshGoogleAccount()
         viewModelScope.launch {
             settingsRepository.observeSettings().collect { settings ->
                 _uiState.update {
@@ -40,6 +46,53 @@ class SettingsViewModel(
                 }
             }
         }
+    }
+
+    fun refreshGoogleAccount() {
+        val account = backupRepository.getGoogleDriveHelper().getSignedInAccount()
+        _uiState.update {
+            it.copy(
+                isGoogleSignedIn = account != null,
+                googleAccountName = account?.email
+            )
+        }
+    }
+
+    fun getGoogleSignInIntent() = backupRepository.getGoogleDriveHelper().getSignInIntent()
+
+    fun uploadBackup() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isBackupLoading = true, backupMessage = "Uploading...") }
+            val success = backupRepository.uploadToCloud()
+            _uiState.update {
+                it.copy(
+                    isBackupLoading = false,
+                    backupMessage = if (success) "Backup uploaded successfully" else "Failed to upload backup"
+                )
+            }
+        }
+    }
+
+    fun downloadBackup() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isBackupLoading = true, backupMessage = "Downloading...") }
+            val success = backupRepository.downloadFromCloud()
+            _uiState.update {
+                it.copy(
+                    isBackupLoading = false,
+                    backupMessage = if (success) "Backup restored successfully" else "Failed to restore backup"
+                )
+            }
+        }
+    }
+
+    fun signOutGoogle() {
+        backupRepository.getGoogleDriveHelper().signOut()
+        refreshGoogleAccount()
+    }
+
+    fun clearBackupMessage() {
+        _uiState.update { it.copy(backupMessage = null) }
     }
 
     fun setStrictMode(enabled: Boolean) {

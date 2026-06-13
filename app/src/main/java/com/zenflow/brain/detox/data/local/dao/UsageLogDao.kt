@@ -12,6 +12,9 @@ interface UsageLogDao {
     @Query("SELECT * FROM usage_logs WHERE dateKey = :dateKey")
     fun observeForDate(dateKey: String): Flow<List<UsageLogEntity>>
 
+    @Query("SELECT * FROM usage_logs")
+    suspend fun getAll(): List<UsageLogEntity>
+
     @Query("SELECT * FROM usage_logs WHERE packageName = :packageName AND dateKey = :dateKey LIMIT 1")
     suspend fun getForPackageAndDate(packageName: String, dateKey: String): UsageLogEntity?
 

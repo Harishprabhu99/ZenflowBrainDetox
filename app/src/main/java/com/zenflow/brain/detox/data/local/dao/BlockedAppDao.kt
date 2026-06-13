@@ -12,6 +12,9 @@ interface BlockedAppDao {
     @Query("SELECT * FROM blocked_apps ORDER BY displayName ASC")
     fun observeAll(): Flow<List<BlockedAppEntity>>
 
+    @Query("SELECT * FROM blocked_apps")
+    suspend fun getAll(): List<BlockedAppEntity>
+
     @Query("SELECT * FROM blocked_apps WHERE isEnabled = 1")
     fun observeEnabled(): Flow<List<BlockedAppEntity>>
 
