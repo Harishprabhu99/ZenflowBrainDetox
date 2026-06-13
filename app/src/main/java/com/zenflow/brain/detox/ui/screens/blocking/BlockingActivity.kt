@@ -51,7 +51,14 @@ class BlockingActivity : ComponentActivity() {
             ZenflowBrainDetoxTheme {
                 BlockingScreen(
                     appName = appName,
-                    onGoBack = { finishAndRemoveTask() },
+                    onGoBack = {
+                        val homeIntent = Intent(Intent.ACTION_MAIN).apply {
+                            addCategory(Intent.CATEGORY_HOME)
+                            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                        }
+                        startActivity(homeIntent)
+                        finishAndRemoveTask()
+                    },
                     onOverride = {
                         // Send override intent to service
                         val overrideIntent = Intent(this, MonitoringService::class.java).apply {
