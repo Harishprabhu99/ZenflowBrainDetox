@@ -78,6 +78,15 @@ class HomeViewModel(
         }
     }
 
+    fun refreshPermissions() {
+        _uiState.update {
+            it.copy(
+                hasUsagePermission = PermissionHelper.hasUsageStatsPermission(context),
+                hasOverlayPermission = PermissionHelper.hasOverlayPermission(context)
+            )
+        }
+    }
+
     private fun refreshSavedTime() {
         viewModelScope.launch {
             val saved = usageRepository.getTotalSavedMs()
