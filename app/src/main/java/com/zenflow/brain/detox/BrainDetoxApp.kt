@@ -9,6 +9,12 @@ class BrainDetoxApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        // Load SQLCipher native library at the very beginning
+        try {
+            System.loadLibrary("sqlcipher")
+        } catch (e: Exception) {
+            android.util.Log.e("BrainDetoxApp", "Failed to load sqlcipher", e)
+        }
         container = AppContainer(this)
     }
 }

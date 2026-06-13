@@ -39,12 +39,12 @@ class AppContainer(context: Context) {
     val userRepository: UserRepository by lazy { UserRepository(context) }
 
     private val database: AppDatabase by lazy {
-        // SQLCipher setup
-        System.loadLibrary("sqlcipher")
+        // SQLCipher factory with secure key
         val factory = SupportOpenHelperFactory("zenflow_secure_key".toByteArray())
         
         Room.databaseBuilder(context, AppDatabase::class.java, "brain_detox.db")
             .openHelperFactory(factory)
+            .fallbackToDestructiveMigration()
             .build()
     }
 
