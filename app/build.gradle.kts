@@ -65,6 +65,16 @@ dependencies {
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.datastore.preferences)
 
+    // SQLCipher for encrypted Room database
+    implementation(libs.sqlcipher)
+    implementation(libs.sqlite.ktx)
+
+    // Networking
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.converter.gson)
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.logging)
+
     // Google Drive Backup
     implementation(libs.google.play.services.auth)
     implementation(libs.google.api.client.android)

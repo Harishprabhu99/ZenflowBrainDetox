@@ -8,6 +8,7 @@ import androidx.compose.material.icons.filled.Apps
 import androidx.compose.ui.graphics.vector.ImageVector
 
 sealed class Screen(val route: String, val title: String, val icon: ImageVector? = null) {
+    data object Auth : Screen("auth", "Authentication")
     data object Home : Screen("home", "Home", Icons.Default.Home)
     data object AppSelection : Screen("apps", "Apps", Icons.Default.Apps)
     data object Dashboard : Screen("dashboard", "Progress", Icons.Default.BarChart)
