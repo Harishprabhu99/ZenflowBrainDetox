@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.zenflow.brain.detox.BrainDetoxApp
 import com.zenflow.brain.detox.data.repository.SettingsRepository
+import com.zenflow.brain.detox.service.MonitoringService
 import com.zenflow.brain.detox.ui.theme.BlockRed
 import com.zenflow.brain.detox.ui.theme.ZenflowBrainDetoxTheme
 import kotlinx.coroutines.launch
@@ -44,13 +45,22 @@ class BlockingActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         settingsRepository = (application as BrainDetoxApp).container.settingsRepository
         val appName = intent.getStringExtra(EXTRA_APP_NAME) ?: "App"
+        val packageName = intent.getStringExtra(EXTRA_PACKAGE_NAME) ?: ""
 
         setContent {
             ZenflowBrainDetoxTheme {
                 BlockingScreen(
                     appName = appName,
                     onGoBack = { finishAndRemoveTask() },
-                    onOverride = { finishAndRemoveTask() },
+                    onOverride = {
+                        // Send override intent to service
+                        val overrideIntent = Intent(this, MonitoringService::class.java).apply {
+                            action = MonitoringService.ACTION_OVERRIDE
+                            putExtra(MonitoringService.EXTRA_PACKAGE_NAME, packageName)
+                        }
+                        startService(overrideIntent)
+                        finishAndRemoveTask()
+                    },
                     canOverride = { settingsRepository.canOverrideStrictMode() },
                     recordOverride = { settingsRepository.recordStrictOverride() },
                 )

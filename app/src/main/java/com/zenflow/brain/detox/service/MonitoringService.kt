@@ -38,6 +38,7 @@ class MonitoringService : Service() {
     private var monitorJob: Job? = null
     private var lastForegroundPackage: String? = null
     private val notifiedThresholds = mutableSetOf<String>()
+    private val overriddenPackages = mutableSetOf<String>()
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -56,6 +57,11 @@ class MonitoringService : Service() {
             ACTION_STOP -> {
                 stopSelf()
                 return START_NOT_STICKY
+            }
+            ACTION_OVERRIDE -> {
+                intent.getStringExtra(EXTRA_PACKAGE_NAME)?.let {
+                    overriddenPackages.add(it)
+                }
             }
         }
         startMonitoringLoop()
@@ -100,9 +106,15 @@ class MonitoringService : Service() {
         }
 
         val foreground = usageStatsHelper.getForegroundAppPackage()
+        
+        // Remove override if app is no longer in foreground
+        if (foreground == null || !overriddenPackages.contains(foreground)) {
+            overriddenPackages.clear()
+        }
+
         if (foreground != null && foreground != packageName) {
             val blocked = enabledApps.find { it.packageName == foreground }
-            if (blocked != null) {
+            if (blocked != null && !overriddenPackages.contains(foreground)) {
                 val usedMs = usageStatsHelper.getUsageForPackageToday(foreground)
                 if (usedMs >= blocked.dailyLimitMinutes * 60_000L) {
                     showBlockingScreen(blocked.displayName, blocked.packageName)
@@ -175,6 +187,8 @@ class MonitoringService : Service() {
 
     companion object {
         const val ACTION_STOP = "com.zenflow.brain.detox.STOP_MONITORING"
+        const val ACTION_OVERRIDE = "com.zenflow.brain.detox.OVERRIDE_APP"
+        const val EXTRA_PACKAGE_NAME = "extra_package_name"
         private const val CHANNEL_ID = "monitoring_channel"
         private const val NOTIFICATION_ID = 1001
         private const val POLL_INTERVAL_MS = 1_000L
