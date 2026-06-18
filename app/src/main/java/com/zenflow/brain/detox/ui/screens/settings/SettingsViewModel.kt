@@ -27,6 +27,7 @@ class SettingsViewModel(
 
     private val settingsRepository = container.settingsRepository
     private val backupRepository = container.backupRepository
+    private val userRepository = container.userRepository
     private val context = container.context
 
     private val _uiState = MutableStateFlow(SettingsUiState())
@@ -104,6 +105,12 @@ class SettingsViewModel(
 
     fun clearBackupMessage() {
         _uiState.update { it.copy(backupMessage = null) }
+    }
+
+    fun logout() {
+        viewModelScope.launch {
+            userRepository.logout()
+        }
     }
 
     fun setStrictMode(enabled: Boolean) {

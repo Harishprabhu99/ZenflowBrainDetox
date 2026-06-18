@@ -18,7 +18,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material.icons.filled.Logout
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -27,9 +29,11 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,10 +45,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zenflow.brain.detox.util.PermissionHelper
 
 @Composable
-fun SettingsScreen(viewModel: SettingsViewModel = appViewModel { SettingsViewModel(it) }) {
+fun SettingsScreen(
+    viewModel: SettingsViewModel = appViewModel { SettingsViewModel(it) },
+    onLogout: () -> Unit = {}
+) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
+    val showLogoutDialog = remember { mutableStateOf(false) }
 
     val signInLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -212,22 +220,51 @@ fun SettingsScreen(viewModel: SettingsViewModel = appViewModel { SettingsViewMod
                     modifier = Modifier.padding(top = 4.dp),
                 )
             }
-            item {
-                Text(
-                    "Privacy",
-                    modifier = Modifier.padding(top = 16.dp),
-                    fontWeight = FontWeight.SemiBold,
-                )
-                Text(
-                    "All usage data is stored locally on your device. No personal data is collected.",
-                    style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.padding(top = 4.dp),
-                )
-            }
-        }
-        SnackbarHost(hostState = snackbarHostState)
-    }
-}
+             item {
+                 Text(
+                     "Privacy",
+                     modifier = Modifier.padding(top = 16.dp),
+                     fontWeight = FontWeight.SemiBold,
+                 )
+                 Text(
+                     "All usage data is stored locally on your device. No personal data is collected.",
+                     style = MaterialTheme.typography.bodySmall,
+                     modifier = Modifier.padding(top = 4.dp),
+                 )
+             }
+             item { HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp)) }
+             item {
+                 Button(
+                     onClick = { showLogoutDialog.value = true },
+                     modifier = Modifier
+                         .fillMaxWidth()
+                         .padding(top = 16.dp),
+                     colors = ButtonDefaults.buttonColors(
+                         containerColor = MaterialTheme.colorScheme.error
+                     )
+                 ) {
+                     Icon(Icons.Default.Logout, contentDescription = null, modifier = Modifier.size(18.dp))
+                     Spacer(Modifier.size(8.dp))
+                     Text("Logout")
+                 }
+             }
+         }
+         SnackbarHost(hostState = snackbarHostState)
+     }
+
+     if (showLogoutDialog.value) {
+         LogoutConfirmationDialog(
+             onConfirm = {
+                 showLogoutDialog.value = false
+                 viewModel.logout()
+                 onLogout()
+             },
+             onDismiss = {
+                 showLogoutDialog.value = false
+             }
+         )
+     }
+ }
 
 @Composable
 private fun SettingsToggle(
@@ -253,3 +290,26 @@ private fun SettingsToggle(
         }
     }
 }
+
+@Composable
+private fun LogoutConfirmationDialog(
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Logout") },
+        text = { Text("Are you sure you want to logout? You will need to login again to access your account.") },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text("Logout", color = MaterialTheme.colorScheme.error)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+

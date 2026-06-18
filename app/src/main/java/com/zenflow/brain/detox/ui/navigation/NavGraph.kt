@@ -96,9 +96,15 @@ fun BrainDetoxNavHost(
             composable(Screen.Dashboard.route) {
                 DashboardScreen()
             }
-            composable(Screen.Settings.route) {
-                SettingsScreen()
-            }
+             composable(Screen.Settings.route) {
+                 SettingsScreen(
+                     onLogout = {
+                         navController.navigate(Screen.Auth.route) {
+                             popUpTo(navController.graph.id) { inclusive = true }
+                         }
+                     }
+                 )
+             }
             composable(
                 route = Screen.TimerSettings.route,
                 arguments = listOf(navArgument("packageName") { type = NavType.StringType }),
