@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
 
 data class AuthUiState(
     val isLoading: Boolean = false,
@@ -39,7 +40,18 @@ class AuthViewModel(
                 userRepository.saveAuthToken(response.token, email)
                 _uiState.update { it.copy(isLoading = false, isAuthenticated = true) }
             } catch (e: Exception) {
-                _uiState.update { it.copy(isLoading = false, error = e.localizedMessage ?: "Login failed") }
+                val message = when (e) {
+                    is HttpException -> {
+                        when (e.code()) {
+                            401 -> "Invalid email or password"
+                            400 -> "Bad request – please check your input"
+                            500 -> "Server error – try again later"
+                            else -> "Unexpected error: ${e.code()}"
+                        }
+                    }
+                    else -> e.localizedMessage ?: "Login failed"
+                }
+                _uiState.update { it.copy(isLoading = false, error = message) }
             }
         }
     }
